@@ -1,6 +1,9 @@
 package tictactoe;
 
 import java.rmi.Naming;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,29 +15,34 @@ import javafx.stage.Stage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
-public class TicTacToe_Client extends Application {
+public class ClientMain extends Application {
+    
+    public static Text text = new Text();
+    public static int id = -1;
+    public static int status = -1;
+    //0 - wait on second player
+    //1 - my turn
+    //2 - opponent turn
+    //3 - my win
+    //4 - opponent win
 
     @Override
     public void start(Stage primaryStage) {
-
+        
         GridPane gridPane = new GridPane();
 
-        Text text = new Text();
         //text.setText("Test");
-
         gridPane.add(text, 0, 0, 3, 1);
         GridPane.setHalignment(text, HPos.CENTER);
         GridPane.setMargin(text, new Insets(5, 0, 0, 0));
-
+        
         Button[] btn = new Button[9];
         for (int i = 0; i < 9; i++) {
             btn[i] = new Button();
             //btn[i].setText(Integer.toString(i));
-            btn[i].setMaxWidth(100);
             btn[i].setMinWidth(100);
-            btn[i].setMaxHeight(100);
             btn[i].setMinHeight(100);
-
+            
             GridPane.setMargin(btn[i], new Insets(5));
             if (i < 3) {
                 gridPane.add(btn[i], i % 3, 1);
@@ -45,7 +53,7 @@ public class TicTacToe_Client extends Application {
             }
         }
         btn[0].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[0].getText() == "X") {
@@ -57,7 +65,7 @@ public class TicTacToe_Client extends Application {
             }
         });
         btn[1].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[1].getText() == "X") {
@@ -69,7 +77,7 @@ public class TicTacToe_Client extends Application {
             }
         });
         btn[2].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[2].getText() == "X") {
@@ -81,7 +89,7 @@ public class TicTacToe_Client extends Application {
             }
         });
         btn[3].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[3].getText() == "X") {
@@ -93,7 +101,7 @@ public class TicTacToe_Client extends Application {
             }
         });
         btn[4].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[4].getText() == "X") {
@@ -105,7 +113,7 @@ public class TicTacToe_Client extends Application {
             }
         });
         btn[5].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[5].getText() == "X") {
@@ -117,7 +125,7 @@ public class TicTacToe_Client extends Application {
             }
         });
         btn[6].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[6].getText() == "X") {
@@ -129,7 +137,7 @@ public class TicTacToe_Client extends Application {
             }
         });
         btn[7].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[7].getText() == "X") {
@@ -141,7 +149,7 @@ public class TicTacToe_Client extends Application {
             }
         });
         btn[8].setOnAction(new EventHandler<ActionEvent>() {
-
+            
             @Override
             public void handle(ActionEvent event) {
                 if (btn[8].getText() == "X") {
@@ -152,40 +160,48 @@ public class TicTacToe_Client extends Application {
                 System.out.println("Field " + 8);
             }
         });
-
+        
         Scene scene = new Scene(gridPane, 330, 350);
-
+        
         primaryStage.setTitle("TicTacToe!");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
     }
-
+    
+    public static Runnable checkStatus = new Runnable() {
+        public void run() {
+            System.out.println("Hello world");
+        }
+    };
+    
     public static void main(String[] args) {
-
-        System.out.println("Test");
-
-        //connection to the server and obtaining id
+        
         System.setProperty("java.security.policy", "security.policy");
-
         System.setSecurityManager(new SecurityManager());
-
+        
         try {
 
             //ServerInterface myRemoteObject = (ServerInterface) Naming.lookup("//192.168.43.233/ABC");
             ServerInterface myRemoteObject = (ServerInterface) Naming.lookup("//localhost/ABC");
-
-            String result = myRemoteObject.test("First test");
-
-            System.out.println("The answer received from the server: " + result);
-
+            
+            id = myRemoteObject.connect();
+            
+            text.setText("Received ID: " + Integer.toString(id));
+            
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(checkStatus, 0, 1, TimeUnit.SECONDS);
+            
+            launch(args);
+            
+            executor.shutdown();
+            myRemoteObject.disconnect(id);
+            
         } catch (Exception e) {
-
+            
             e.printStackTrace();
-
+            
         }
-
-        launch(args);
-
+        
     }
 }
