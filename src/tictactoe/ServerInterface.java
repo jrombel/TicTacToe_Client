@@ -11,9 +11,7 @@ public interface ServerInterface extends Remote {
 
     int checkPlayerStatus(int id) throws RemoteException;
 
-    Boolean checkWhoseMove() throws RemoteException;
+    Boolean selectField(int id, int number) throws RemoteException;
 
     Board getBoard() throws RemoteException;
-
-    Boolean makeMove(Board board) throws RemoteException;
 }
